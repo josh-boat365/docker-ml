@@ -1,87 +1,81 @@
-from flask import Flask, jsonify, request
-import numpy as np 
-import pandas as pd
+
+
+from flask import Flask, request
+import numpy as np
 import pickle
-#Swagger is an api that automatically generates UI for frontend based on certain keywords
+import pandas as pd
+import flasgger
 from flasgger import Swagger
 
-#creating instance of flask app
-app = Flask(__name__)
-#Initialising the flask app into Swagger to generate the UI
+app=Flask(__name__)
 Swagger(app)
 
-pickle_load = open('./classifier.pkl', 'rb')
-classifier = pickle.load(pickle_load)
+pickle_in = open("classifier.pkl","rb")
+classifier=pickle.load(pickle_in)
 
 @app.route('/')
-def home():
-    return "WELCOME  THIS IS A BANK NOTE ML PREDICTION MODEL"
+def welcome():
+    return "Welcome All"
 
-@app.route('/predict', methods=["Get"])
+@app.route('/predict',methods=["Get"])
 def predict_note_authentication():
-
+    
     """Let's Authenticate the Banks Note 
     This is using docstrings for specifications.
     ---
-    parameters:
-        - name:variance
-        - in: query
-        - type: number
-        - required: true
-        - name:skewness
-        - in: query
-        - type: number
-        - required: true
-        - name:curtosis
-        - in: query
-        - type: number
-        - required: true
-        - name:entropy
-        - in: query
-        - type: number
-        - required: true
+    parameters:  
+      - name: variance
+        in: query
+        type: number
+        required: true
+      - name: skewness
+        in: query
+        type: number
+        required: true
+      - name: curtosis
+        in: query
+        type: number
+        required: true
+      - name: entropy
+        in: query
+        type: number
+        required: true
     responses:
         200:
             description: The output values
         
-
     """
-
-    variance =request.args.get('variance')
-    skewness =request.args.get('skewness')
-    curtosis =request.args.get('curtosis')
-    entropy =request.args.get('entropy')
-
-    prediction = classifier.predict([[variance, skewness, curtosis, entropy]])
+    variance=request.args.get("variance")
+    skewness=request.args.get("skewness")
+    curtosis=request.args.get("curtosis")
+    entropy=request.args.get("entropy")
+    prediction=classifier.predict([[variance,skewness,curtosis,entropy]])
     print(prediction)
+    return "Hello The answer is"+str(prediction)
 
-    return "The prediction value is "+ str(prediction)
-
-@app.route('/predict_file', methods=["POST"])
-def predict_file_test():
-
+@app.route('/predict_file',methods=["POST"])
+def predict_note_file():
     """Let's Authenticate the Banks Note 
     This is using docstrings for specifications.
     ---
     parameters:
-        - name:file
-        - in: formData
-        - type: file
-        - required: true
-
+      - name: file
+        in: formData
+        type: file
+        required: true
+      
     responses:
         200:
             description: The output values
         
     """
-
-    df_test = pd.read_csv(request.files.get("file"))
+    df_test=pd.read_csv(request.files.get("file"))
     print(df_test.head())
-    pred = classifier.predict(df_test)
+    prediction=classifier.predict(df_test)
+    
+    return str(list(prediction))
 
-    return str(list(pred))
-
-
-
-if __name__ == '__main__':
-    app.run(debug=True, host=5000)
+if __name__=='__main__':
+    app.run(host='0.0.0.0',port=8000)
+    
+    
